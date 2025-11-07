@@ -26,7 +26,7 @@ function App() {
       // ESTE É O URL DE PRODUÇÃO DO SEU N8N
       // (Você precisa colar o seu "Production URL" do Webhook aqui)
       const response = await fetch(
-        'https://arcadepandora.cloud/webhook/https://api.arcadepandora.cloud', 
+        'https://api.arcadepandora.cloud/webhook/7f60ab7c-a4d7-4b2f-9922-3b16e44d8240', 
         {
           method: 'POST',
           headers: {
