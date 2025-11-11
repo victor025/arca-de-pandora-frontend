@@ -28,6 +28,8 @@ function ScoreRenderer({ musicxml_base64 }) {
         autoResize: true,
         drawTitle: true,
         backend: 'svg', // Renderiza como SVG, que é nítido
+        drawPartNames: false, // Desativa os nomes de pauta (Instr. Pc818...)
+        drawPartAbbreviations: false, // Desativa a abreviação do nome de pauta
       });
 
       // Carrega e renderiza o XML
