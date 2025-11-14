@@ -1,12 +1,3 @@
-Aqui está o código completo do componente src/Message.js.
-
-Este componente é responsável por receber os dados da partitura (musicxml_base64) e renderizá-los usando o OpenSheetMusicDisplay, além de criar os links de download.
-
-💻 Código para src/Message.js (Estável)
-Substitua o conteúdo do seu arquivo src/Message.js por este bloco:
-
-JavaScript
-
 import React from 'react';
 import ScoreRenderer from './ScoreRenderer'; // Componente que desenha a partitura
 
