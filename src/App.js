@@ -1,3 +1,9 @@
+Com certeza. Aqui está o código do seu src/App.js que remove toda a lógica de memória (chatHistory) e reverte o payload para o formato simples (prompt) que o seu workflow N8N espera.
+
+Substitua todo o conteúdo do seu src/App.js por este código:
+
+JavaScript
+
 import React, { useState, useRef, useEffect } from 'react';
 import './App.css'; // Importa os estilos
 import Message from './Message'; // Componente para exibir mensagens
@@ -7,9 +13,7 @@ function App() {
   const [currentInput, setCurrentInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
-  
-  // NOVO ESTADO: Armazena o histórico da conversa no formato que o Gemini entende (role/content)
-  // const [chatHistory, setChatHistory] = useState([]); 
+  // O estado 'chatHistory' (memória) foi removido
   
 
   useEffect(() => {
@@ -21,36 +25,25 @@ function App() {
   const handleSendMessage = async () => {
     if (currentInput.trim() === '') return;
 
-    // 1. Mensagens para a Interface Visual
-    const userMessageVisual = { text: currentInput, sender: 'user' };
+    // Mensagem do usuário para a interface visual
+    const userMessage = { text: currentInput, sender: 'user' };
     
-    // 2. Mensagem do Usuário no formato que a API espera (para a Memória)
-    const userMessageForAPI = { 
-        role: "user", 
-        content: currentInput 
-    };
-
-    setMessages(prevMessages => [...prevMessages, userMessageVisual]);
+    setMessages(prevMessages => [...prevMessages, userMessage]);
     setCurrentInput('');
     setIsLoading(true);
 
-    // 3. CONSTRÓI O PAYLOAD: Junta o histórico anterior com a nova pergunta
-    const payload = {
-        messages: [...chatHistory, userMessageForAPI] // Envia o array de mensagens completo
-    };
-
-
     try {
+      // ESTE CÓDIGO ENVIA O PAYLOAD SIMPLES: {"prompt": "..."}
       const response = await fetch(
-        // ATENÇÃO: Use o seu Production URL aqui
+        // URL DE PRODUÇÃO CORRETO
         'https://api.arcadepandora.cloud/webhook/7f60ab7c-a4d7-4b2f-9922-3b16e44d8240', 
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          // 4. ENVIA O ARRAY DE MENSAGENS COMPLETO
-          body: JSON.stringify(payload),
+          // AQUI: Volta a enviar apenas o prompt (payload stateless)
+          body: JSON.stringify({ prompt: userMessage.text }), 
         }
       );
 
@@ -60,23 +53,16 @@ function App() {
 
       const data = await response.json(); // N8N envia a resposta final
 
-      // 5. Resposta da IA para a Interface Visual
-      const aiResponseVisual = {
+      // Agora pegamos a explicação e o MusicXML
+      const aiResponse = {
         text: data.explanation || 'Não foi possível gerar uma explicação.',
-        musicxml_base64: data.musicxml_base64 || null,
+        musicxml_base64: data.musicxml_base64 || null, // A partitura
         png_base64: data.png_base64 || null,
         sender: 'ai',
       };
       
-      // 6. Resposta da IA para a Memória (Armazena a explicação para contexto futuro)
-      const aiResponseForAPI = {
-          role: "model", 
-          content: data.explanation // A IA usará este texto como contexto
-      };
-      
-      // 7. ATUALIZA A MEMÓRIA: Adiciona a pergunta e a resposta à memória
-      setChatHistory(prevHistory => [...prevHistory, userMessageForAPI, aiResponseForAPI]);
-      setMessages(prevMessages => [...prevMessages, aiResponseVisual]);
+      // A lógica de atualização da memória (setChatHistory) foi removida
+      setMessages(prevMessages => [...prevMessages, aiResponse]);
 
     } catch (error) {
       console.error('Erro ao comunicar com o N8N:', error);
