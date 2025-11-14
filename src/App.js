@@ -7,6 +7,10 @@ function App() {
   const [currentInput, setCurrentInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  
+  // NOVO ESTADO: Armazena o histórico da conversa no formato que o Gemini entende
+  const [chatHistory, setChatHistory] = useState([]); 
+  
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -17,14 +21,27 @@ function App() {
   const handleSendMessage = async () => {
     if (currentInput.trim() === '') return;
 
-    const userMessage = { text: currentInput, sender: 'user' };
-    setMessages(prevMessages => [...prevMessages, userMessage]);
+    // Mensagem do usuário para a interface visual
+    const userMessageVisual = { text: currentInput, sender: 'user' };
+    
+    // Mensagem do usuário para a API (no formato 'role'/'content')
+    const userMessageForAPI = { 
+        role: "user", 
+        content: currentInput 
+    };
+
+    setMessages(prevMessages => [...prevMessages, userMessageVisual]);
     setCurrentInput('');
     setIsLoading(true);
 
+    // 1. CONSTRÓI O PAYLOAD DE MEMÓRIA COMPLETO
+    const payload = {
+        // Envia todo o histórico anterior + a nova mensagem
+        messages: [...chatHistory, userMessageForAPI] 
+    };
+
+
     try {
-      // ESTE É O URL DE PRODUÇÃO DO SEU N8N
-      // (Você precisa colar o seu "Production URL" do Webhook aqui)
       const response = await fetch(
         'https://api.arcadepandora.cloud/webhook/7f60ab7c-a4d7-4b2f-9922-3b16e44d8240', 
         {
@@ -32,7 +49,8 @@ function App() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ prompt: userMessage.text }),
+          // 2. ENVIA O PAYLOAD COMPLETO (com o array 'messages')
+          body: JSON.stringify(payload),
         }
       );
 
@@ -42,13 +60,22 @@ function App() {
 
       const data = await response.json(); // N8N envia a resposta final
 
-      // Agora pegamos a explicação E o MusicXML
-      const aiResponse = {
+      // 3. Resposta da IA para a Interface Visual
+      const aiResponseVisual = {
         text: data.explanation || 'Não foi possível gerar uma explicação.',
-        musicxml_base64: data.musicxml_base64 || null, // A partitura
+        musicxml_base64: data.musicxml_base64 || null,
         sender: 'ai',
       };
-      setMessages(prevMessages => [...prevMessages, aiResponse]);
+      
+      // 4. Resposta da IA para a Memória (simples, sem o XML pesado, mas com a explicação)
+      const aiResponseForAPI = {
+          role: "model", 
+          content: data.explanation // A IA usará este texto como contexto
+      };
+      
+      // 5. ATUALIZA O ESTADO: Adiciona a pergunta e a resposta à MEMÓRIA e à INTERFACE
+      setChatHistory(prevHistory => [...prevHistory, userMessageForAPI, aiResponseForAPI]);
+      setMessages(prevMessages => [...prevMessages, aiResponseVisual]);
 
     } catch (error) {
       console.error('Erro ao comunicar com o N8N:', error);
