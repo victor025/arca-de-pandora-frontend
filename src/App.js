@@ -1,9 +1,3 @@
-Com certeza. Aqui está o código do seu src/App.js que remove toda a lógica de memória (chatHistory) e reverte o payload para o formato simples (prompt) que o seu workflow N8N espera.
-
-Substitua todo o conteúdo do seu src/App.js por este código:
-
-JavaScript
-
 import React, { useState, useRef, useEffect } from 'react';
 import './App.css'; // Importa os estilos
 import Message from './Message'; // Componente para exibir mensagens
