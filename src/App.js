@@ -9,7 +9,7 @@ function App() {
   const messagesEndRef = useRef(null);
   
   // NOVO ESTADO: Armazena o histórico da conversa no formato que o Gemini entende (role/content)
-  const [chatHistory, setChatHistory] = useState([]); 
+  // const [chatHistory, setChatHistory] = useState([]); 
   
 
   useEffect(() => {
