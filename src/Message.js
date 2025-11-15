@@ -20,17 +20,31 @@ const createDownloadLink = (base64Data, filename, mimeType) => {
 };
 
 // Certifique-se de que ele não usa nenhuma variável de memória
-function Message({ sender, text, musicxml_base64, png_base64, initial }) {
+function Message({ sender, text, musicxml_base64, png_base64, midi_base64, initial }) { // <-- ATUALIZADO: Adiciona midi_base64
   const messageClass = sender === 'user' ? 'user' : 'ai';
   
-  // Condição para mostrar os botões de download
-  const showDownloads = musicxml_base64 || png_base64;
+  // Condição para mostrar os botões de download e a seção de partitura
+  const showDownloads = musicxml_base64 || png_base64 || midi_base64;
 
+  // Cria o URI de dados para o elemento <audio>
+  const midiDataUri = midi_base64 ? `data:audio/midi;base64,${midi_base64}` : null;
+  
   return (
     <div className={`message-wrapper ${messageClass}`}>
       <div className={`message-content ${initial ? 'initial-message' : ''}`}>
         {/* O texto da explicação */}
         {text}
+        
+        {/* PLAYER DE ÁUDIO MIDI (NOVO BLOCO) */}
+        {midiDataUri && (
+          <div className="audio-player-section">
+            <h4>Reprodução de Áudio:</h4>
+            {/* O elemento <audio> nativo do HTML com a fonte Base64 */}
+            <audio controls src={midiDataUri} style={{ width: '100%' }}>
+              Seu navegador não suporta a reprodução de MIDI.
+            </audio>
+          </div>
+        )}
         
         {/* O RENDERIZADOR VISUAL (usa o MusicXML) */}
         {musicxml_base64 && (
@@ -44,11 +58,18 @@ function Message({ sender, text, musicxml_base64, png_base64, initial }) {
           <div className="download-section">
             <h4>Arquivos para Download:</h4>
             
-            {/* Link de Download do MUSICXML (para edição no MuseScore, etc.) */}
+            {/* Link de Download do MUSICXML */}
             {musicxml_base64 && createDownloadLink(
                 musicxml_base64, 
                 'ArcaDePandora_Partitura.xml', 
                 'application/vnd.musicxml' // O MIME Type correto
+            )}
+
+            {/* Link de Download do MIDI */}
+            {midi_base64 && createDownloadLink(
+                midi_base64, 
+                'ArcaDePandora_Audio.mid', 
+                'audio/midi' // O MIME Type para MIDI
             )}
             
             {/* Link de Download do PNG (se você decidir implementá-lo no futuro) */}

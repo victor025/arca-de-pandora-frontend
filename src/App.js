@@ -45,13 +45,15 @@ function App() {
         throw new Error(`Erro na API: ${response.status}`);
       }
 
-      const data = await response.json(); // N8N envia a resposta final
+      // IMPORTANTE: Ler a resposta como JSON
+      const data = await response.json(); 
 
-      // Agora pegamos a explicação e o MusicXML
+      // Agora pegamos a explicação, o MusicXML E o MIDI (NOVO CAMPO)
       const aiResponse = {
         text: data.explanation || 'Não foi possível gerar uma explicação.',
-        musicxml_base64: data.musicxml_base64 || null, // A partitura
+        musicxml_base64: data.musicxml_base64 || null, // A partitura (Visual/Download)
         png_base64: data.png_base64 || null,
+        midi_base64: data.midi_base64 || null, // <-- ADICIONADO: O ÁUDIO MIDI
         sender: 'ai',
       };
       
@@ -89,6 +91,7 @@ function App() {
               text={msg.text}
               musicxml_base64={msg.musicxml_base64}
               png_base64={msg.png_base64}
+              midi_base64={msg.midi_base64} // <-- ADICIONADO: Passa o MIDI para o componente Message
             />
           ))}
           {isLoading && (
