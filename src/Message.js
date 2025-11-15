@@ -3,11 +3,10 @@ import ScoreRenderer from './ScoreRenderer'; // Componente que desenha a partitu
 
 // Função auxiliar para criar o link de download a partir da string Base64
 const createDownloadLink = (base64Data, filename, mimeType) => {
-  // A string Base64 é prefixada com o MIME type para ser um Data URI válido
   const dataUri = `data:${mimeType};base64,${base64Data}`;
   return (
     <a 
-      key={filename} // Adiciona uma chave para o React
+      key={filename} 
       href={dataUri} 
       download={filename} 
       className="download-link"
@@ -19,12 +18,11 @@ const createDownloadLink = (base64Data, filename, mimeType) => {
   );
 };
 
-// Certifique-se de que ele não usa nenhuma variável de memória
-function Message({ sender, text, musicxml_base64, png_base64, midi_base64, initial }) { // <-- ATUALIZADO: Adiciona midi_base64
+function Message({ sender, text, musicxml_base64, png_base64, midi_base64, initial }) {
   const messageClass = sender === 'user' ? 'user' : 'ai';
   
   // Condição para mostrar os botões de download e a seção de partitura
-  const showDownloads = musicxml_base64 || png_base64 || midi_base64;
+  const showDownloads = musicxml_base64 || png_base64 || midi_base64; 
 
   // Cria o URI de dados para o elemento <audio>
   const midiDataUri = midi_base64 ? `data:audio/midi;base64,${midi_base64}` : null;
@@ -35,7 +33,7 @@ function Message({ sender, text, musicxml_base64, png_base64, midi_base64, initi
         {/* O texto da explicação */}
         {text}
         
-        {/* PLAYER DE ÁUDIO MIDI (NOVO BLOCO) */}
+        {/* PLAYER DE ÁUDIO MIDI */}
         {midiDataUri && (
           <div className="audio-player-section">
             <h4>Reprodução de Áudio:</h4>
@@ -56,23 +54,23 @@ function Message({ sender, text, musicxml_base64, png_base64, midi_base64, initi
         {/* A SEÇÃO DE DOWNLOADS */}
         {showDownloads && (
           <div className="download-section">
-            <h4>Arquivos para Download:</h4>
+            <h4>Arquivos:</h4>
             
             {/* Link de Download do MUSICXML */}
             {musicxml_base64 && createDownloadLink(
                 musicxml_base64, 
                 'ArcaDePandora_Partitura.xml', 
-                'application/vnd.musicxml' // O MIME Type correto
+                'application/vnd.musicxml'
             )}
 
             {/* Link de Download do MIDI */}
-            {midi_base64 && createDownloadLink(
+            {midi_base64 && createDownloadLink( // <--- NOVO LINK DE DOWNLOAD MIDI
                 midi_base64, 
                 'ArcaDePandora_Audio.mid', 
-                'audio/midi' // O MIME Type para MIDI
+                'audio/midi' 
             )}
             
-            {/* Link de Download do PNG (se você decidir implementá-lo no futuro) */}
+            {/* Link de Download do PNG */}
             {png_base64 && createDownloadLink(
                 png_base64, 
                 'ArcaDePandora_Visual.png', 
