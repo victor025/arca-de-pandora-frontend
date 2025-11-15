@@ -4,7 +4,7 @@ import * as Tone from 'tone';
 // O import do 'Midi' foi removido para evitar erros de dependência
 
 // URL de SoundFont que você criou no seu domínio
-const soundfontUrl = 'https://audio.arcadepandora.cloud/'; 
+const soundfontUrl = 'https://audio.arcadepandora.cloud/acoustic_grand_piano/';
 
 const AudioPlayer = ({ midiBase64 }) => {
   const [loading, setLoading] = useState(true);
