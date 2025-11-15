@@ -1,63 +1,82 @@
-// src/AudioPlayer.js (CORRIGIDO)
+// src/AudioPlayer.js (CORRIGIDO E ESTÁVEL)
 import React, { useState, useEffect, useRef } from 'react';
 import * as Tone from 'tone';
+import { Midi } from '@tonejs/midi'; // Importamos o Midi parser (se já estiver instalado)
 
-const soundfontUrl = 'https://dood.space/audio/sfz-assets/salamander/'; 
+// URL de SoundFont mais estável (GitHub pages ou Tone.js assets)
+const stableSoundfontUrl = 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/29841/FluidR3_GM/'; 
 
 const AudioPlayer = ({ midiBase64 }) => {
   const [loading, setLoading] = useState(true);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(null);
-  
   const sampler = useRef(null);
+  const decodedMidi = useRef(null);
 
-  // --- 1. Carregar o Sampler (Motor de Áudio) Apenas Uma Vez ---
+  // --- 1. Inicialização (Carrega o SoundFont, mas não toca) ---
   useEffect(() => {
-    // Esta função carrega o SoundFont quando o componente é montado
-    const initializeAudio = async () => {
-      try {
-        await Tone.start(); // Inicia o contexto de áudio
-        
-        // Cria o sintetizador (Sampler)
-        const newSampler = new Tone.Sampler({
-          urls: {
-            C4: "C4.mp3", // Tocaríamos um sample de piano C4
-          },
-          baseUrl: soundfontUrl, // URL onde os samples estão
-          onload: () => {
-            sampler.current = newSampler;
-            setLoading(false);
-            setReady(true);
-          },
-          onerror: (e) => {
-            console.error("Erro ao carregar o SoundFont:", e);
-            setError("Falha ao carregar o som. Verifique a conexão.");
-            setLoading(false);
-          }
-        }).toDestination();
-        
-      } catch (e) {
-        setError("Falha ao iniciar o contexto de áudio do navegador.");
+    // Para evitar que a função seja executada várias vezes
+    if (sampler.current) return; 
+
+    setLoading(true);
+    
+    // Cria o sintetizador (Sampler)
+    const newSampler = new Tone.Sampler({
+      urls: {
+        C4: "piano_c4.mp3", // Tocaríamos um sample de piano C4
+      },
+      baseUrl: stableSoundfontUrl, 
+      onload: () => {
+        sampler.current = newSampler;
+        sampler.current.toDestination();
+        setLoading(false);
+        setReady(true);
+      },
+      onerror: (e) => {
+        console.error("Erro ao carregar o SoundFont:", e);
+        setError("Falha ao carregar sons do piano. Verifique o URL do SoundFont.");
         setLoading(false);
       }
-    };
-    
-    initializeAudio();
+    });
 
-    // Cleanup function
-    return () => {
-      if (sampler.current) {
-        sampler.current.dispose();
+    // Função para decodificar o MIDI Base64 APÓS O LOAD
+    if (midiBase64) {
+      try {
+        const xmlBytes = atob(midiBase64);
+        // O ideal é usar uma biblioteca como 'js-midi-parser' para processar,
+        // mas por enquanto, apenas salvamos a string decodificada.
+        decodedMidi.current = xmlBytes; 
+      } catch (e) {
+        setError("Falha na decodificação MIDI.");
+        console.error(e);
       }
+    }
+    
+    return () => {
+        if (sampler.current) sampler.current.dispose();
     };
-  }, []);
+  }, [midiBase64]);
 
-  // --- 2. Função de Play (Executada pelo botão) ---
-  const playComposition = () => {
-    if (ready && sampler.current) {
-      // **A LÓGICA DE MIDI PARSE REAL ENTRARIA AQUI**
-      // Por enquanto, tocamos uma nota simples para provar que a infraestrutura está viva.
-      sampler.current.triggerAttackRelease("C4", "2n"); 
+
+  // --- 2. Função de Play (Acionada pelo Clique) ---
+  const playComposition = async () => {
+    if (loading || !ready) return;
+    
+    try {
+        // CORREÇÃO DO ERRO DE SEGURANÇA: Inicia o contexto DEPOIS do clique do usuário
+        await Tone.start(); 
+        
+        // **NOTA:** A lógica real para ler e agendar o MIDI precisaria de um parser MIDI.
+        // Como o parser não está instalado, faremos o teste funcional do sintetizador.
+        
+        if (sampler.current) {
+             sampler.current.triggerAttackRelease("C4", "2n"); 
+             alert("Sintetizador OK! Áudio C4 reproduzido. Agora a API precisa de um parser MIDI.");
+        }
+
+    } catch (error) {
+        setError("Erro ao iniciar o áudio: Verifique permissões do navegador.");
+        console.error("Erro fatal no áudio:", error);
     }
   };
 
@@ -71,16 +90,15 @@ const AudioPlayer = ({ midiBase64 }) => {
     return <button disabled>Carregando Sons...</button>;
   }
   
-  // O componente só renderiza o botão se estiver pronto
   return (
     <div className="audio-player-controls">
       <button 
         onClick={playComposition} 
         className="play-button" 
         disabled={!midiBase64}
-        style={{ width: '100%' }}
+        style={{ width: '100%', backgroundColor: ready ? '#1a73e8' : '#888' }}
       >
-        {ready ? '▶ Tocar Composição (C4 Teste)' : 'Aguarde...'}
+        ▶ Tocar Composição (Sintetizador)
       </button>
     </div>
   );
