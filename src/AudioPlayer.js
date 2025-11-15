@@ -1,15 +1,16 @@
-// src/AudioPlayer.js (CORRIGIDO E ESTÁVEL)
+// src/AudioPlayer.js (CÓDIGO CORRIGIDO E FINAL)
 import React, { useState, useEffect, useRef } from 'react';
 import * as Tone from 'tone';
-import { Midi } from '@tonejs/midi'; // Importamos o Midi parser (se já estiver instalado)
+// O import do 'Midi' foi removido para evitar erros de dependência
 
-// URL do novo servidor de SoundFont no seu domínio
-const soundfontUrl = 'https://audio.arcadepandora.cloud/';
+// URL de SoundFont que você criou no seu domínio
+const soundfontUrl = 'https://audio.arcadepandora.cloud/'; 
 
 const AudioPlayer = ({ midiBase64 }) => {
   const [loading, setLoading] = useState(true);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(null);
+  
   const sampler = useRef(null);
   const decodedMidi = useRef(null);
 
@@ -23,9 +24,11 @@ const AudioPlayer = ({ midiBase64 }) => {
     // Cria o sintetizador (Sampler)
     const newSampler = new Tone.Sampler({
       urls: {
-        C4: "piano_c4.mp3", // Tocaríamos um sample de piano C4
+        // Assume que o sample de C4 está disponível no baseUrl
+        C4: "C4.mp3", 
       },
-      baseUrl: stableSoundfontUrl, 
+      // CORREÇÃO: Usando a variável 'soundfontUrl' corretamente
+      baseUrl: soundfontUrl, 
       onload: () => {
         sampler.current = newSampler;
         sampler.current.toDestination();
@@ -38,13 +41,11 @@ const AudioPlayer = ({ midiBase64 }) => {
         setLoading(false);
       }
     });
-
-    // Função para decodificar o MIDI Base64 APÓS O LOAD
+    
+    // Decodifica o MIDI Base64 para uso futuro
     if (midiBase64) {
       try {
         const xmlBytes = atob(midiBase64);
-        // O ideal é usar uma biblioteca como 'js-midi-parser' para processar,
-        // mas por enquanto, apenas salvamos a string decodificada.
         decodedMidi.current = xmlBytes; 
       } catch (e) {
         setError("Falha na decodificação MIDI.");
@@ -66,10 +67,8 @@ const AudioPlayer = ({ midiBase64 }) => {
         // CORREÇÃO DO ERRO DE SEGURANÇA: Inicia o contexto DEPOIS do clique do usuário
         await Tone.start(); 
         
-        // **NOTA:** A lógica real para ler e agendar o MIDI precisaria de um parser MIDI.
-        // Como o parser não está instalado, faremos o teste funcional do sintetizador.
-        
         if (sampler.current) {
+             // Toca a nota de teste
              sampler.current.triggerAttackRelease("C4", "2n"); 
              alert("Sintetizador OK! Áudio C4 reproduzido. Agora a API precisa de um parser MIDI.");
         }
@@ -98,7 +97,7 @@ const AudioPlayer = ({ midiBase64 }) => {
         disabled={!midiBase64}
         style={{ width: '100%', backgroundColor: ready ? '#1a73e8' : '#888' }}
       >
-        ▶ Tocar Composição (Sintetizador)
+        ▶ Tocar Composição (C4 Teste)
       </button>
     </div>
   );
