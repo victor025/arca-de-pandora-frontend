@@ -3,8 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as Tone from 'tone';
 import { Midi } from '@tonejs/midi'; // Importamos o Midi parser (se já estiver instalado)
 
-// URL de SoundFont mais estável (GitHub pages ou Tone.js assets)
-const stableSoundfontUrl = 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/29841/FluidR3_GM/'; 
+// URL do novo servidor de SoundFont no seu domínio
+const soundfontUrl = 'https://audio.arcadepandora.cloud/';
 
 const AudioPlayer = ({ midiBase64 }) => {
   const [loading, setLoading] = useState(true);
