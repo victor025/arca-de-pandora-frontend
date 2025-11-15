@@ -1,12 +1,14 @@
 import React from 'react';
 import ScoreRenderer from './ScoreRenderer'; // Componente que desenha a partitura
+import AudioPlayer from './AudioPlayer'; // <-- IMPORTAÇÃO DO NOVO SINTETIZADOR
 
 // Função auxiliar para criar o link de download a partir da string Base64
 const createDownloadLink = (base64Data, filename, mimeType) => {
+  // A string Base64 é prefixada com o MIME type para ser um Data URI válido
   const dataUri = `data:${mimeType};base64,${base64Data}`;
   return (
     <a 
-      key={filename} 
+      key={filename}
       href={dataUri} 
       download={filename} 
       className="download-link"
@@ -18,14 +20,12 @@ const createDownloadLink = (base64Data, filename, mimeType) => {
   );
 };
 
+// Certifique-se de que ele não usa nenhuma variável de memória
 function Message({ sender, text, musicxml_base64, png_base64, midi_base64, initial }) {
   const messageClass = sender === 'user' ? 'user' : 'ai';
   
   // Condição para mostrar os botões de download e a seção de partitura
   const showDownloads = musicxml_base64 || png_base64 || midi_base64; 
-
-  // Cria o URI de dados para o elemento <audio>
-  const midiDataUri = midi_base64 ? `data:audio/midi;base64,${midi_base64}` : null;
   
   return (
     <div className={`message-wrapper ${messageClass}`}>
@@ -33,14 +33,12 @@ function Message({ sender, text, musicxml_base64, png_base64, midi_base64, initi
         {/* O texto da explicação */}
         {text}
         
-        {/* PLAYER DE ÁUDIO MIDI */}
-        {midiDataUri && (
+        {/* PLAYER DE ÁUDIO MIDI (NOVO BLOCO - Componente AudioPlayer) */}
+        {midi_base64 && (
           <div className="audio-player-section">
             <h4>Reprodução de Áudio:</h4>
-            {/* O elemento <audio> nativo do HTML com a fonte Base64 */}
-            <audio controls src={midiDataUri} style={{ width: '100%' }}>
-              Seu navegador não suporta a reprodução de MIDI.
-            </audio>
+            {/* AGORA USAMOS O COMPONENTE CUSTOMIZADO QUE USARÁ O TONE.JS */}
+            <AudioPlayer midiBase64={midi_base64} /> 
           </div>
         )}
         
@@ -64,7 +62,7 @@ function Message({ sender, text, musicxml_base64, png_base64, midi_base64, initi
             )}
 
             {/* Link de Download do MIDI */}
-            {midi_base64 && createDownloadLink( // <--- NOVO LINK DE DOWNLOAD MIDI
+            {midi_base64 && createDownloadLink( 
                 midi_base64, 
                 'ArcaDePandora_Audio.mid', 
                 'audio/midi' 
