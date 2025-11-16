@@ -1,15 +1,14 @@
+// src/App.js
 import React, { useState, useRef, useEffect } from 'react';
-import './App.css'; // Importa os estilos
-import Message from './Message'; // Componente para exibir mensagens
+import './App.css'; 
+import Message from './Message'; 
 
 function App() {
   const [messages, setMessages] = useState([]);
   const [currentInput, setCurrentInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
-  // O estado 'chatHistory' (memória) foi removido
   
-
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -19,7 +18,6 @@ function App() {
   const handleSendMessage = async () => {
     if (currentInput.trim() === '') return;
 
-    // Mensagem do usuário para a interface visual
     const userMessage = { text: currentInput, sender: 'user' };
     
     setMessages(prevMessages => [...prevMessages, userMessage]);
@@ -27,16 +25,13 @@ function App() {
     setIsLoading(true);
 
     try {
-      // ESTE CÓDIGO ENVIA O PAYLOAD SIMPLES: {"prompt": "..."}
       const response = await fetch(
-        // URL DE PRODUÇÃO CORRETO
         'https://api.arcadepandora.cloud/webhook/7f60ab7c-a4d7-4b2f-9922-3b16e44d8240', 
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          // AQUI: Volta a enviar apenas o prompt (payload stateless)
           body: JSON.stringify({ prompt: userMessage.text }), 
         }
       );
@@ -45,19 +40,17 @@ function App() {
         throw new Error(`Erro na API: ${response.status}`);
       }
 
-      // IMPORTANTE: Ler a resposta como JSON
       const data = await response.json(); 
 
-      // Agora pegamos a explicação, o MusicXML E o MIDI (NOVO CAMPO)
+      // AGORA PEGAMOS O MIDI TAMBÉM
       const aiResponse = {
         text: data.explanation || 'Não foi possível gerar uma explicação.',
-        musicxml_base64: data.musicxml_base64 || null, // A partitura (Visual/Download)
+        musicxml_base64: data.musicxml_base64 || null, 
         png_base64: data.png_base64 || null,
-        midi_base64: data.midi_base64 || null, // <-- ADICIONADO: O ÁUDIO MIDI
+        midi_base64: data.midi_base64 || null, // <--- CAMPO DE ÁUDIO
         sender: 'ai',
       };
       
-      // A lógica de atualização da memória (setChatHistory) foi removida
       setMessages(prevMessages => [...prevMessages, aiResponse]);
 
     } catch (error) {
@@ -91,7 +84,7 @@ function App() {
               text={msg.text}
               musicxml_base64={msg.musicxml_base64}
               png_base64={msg.png_base64}
-              midi_base64={msg.midi_base64} // <-- ADICIONADO: Passa o MIDI para o componente Message
+              midi_base64={msg.midi_base64} // <--- (LINHA 82) PASSA O MIDI
             />
           ))}
           {isLoading && (
@@ -104,7 +97,6 @@ function App() {
           <div ref={messagesEndRef} />
         </div>
         
-        {/* A área de input (prompter) */}
         <div className="input-area-wrapper">
           <textarea
             className="input-textarea"

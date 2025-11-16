@@ -1,14 +1,14 @@
+// src/Message.js
 import React from 'react';
-import ScoreRenderer from './ScoreRenderer'; // Componente que desenha a partitura
-import AudioPlayer from './AudioPlayer'; // <-- IMPORTAÇÃO DO NOVO SINTETIZADOR
+import ScoreRenderer from './ScoreRenderer';
+import AudioPlayer from './AudioPlayer'; // <--- IMPORTA O NOVO PLAYER
 
-// Função auxiliar para criar o link de download a partir da string Base64
+// (A função createDownloadLink permanece a mesma)
 const createDownloadLink = (base64Data, filename, mimeType) => {
-  // A string Base64 é prefixada com o MIME type para ser um Data URI válido
   const dataUri = `data:${mimeType};base64,${base64Data}`;
   return (
     <a 
-      key={filename}
+      key={filename} 
       href={dataUri} 
       download={filename} 
       className="download-link"
@@ -20,24 +20,21 @@ const createDownloadLink = (base64Data, filename, mimeType) => {
   );
 };
 
-// Certifique-se de que ele não usa nenhuma variável de memória
 function Message({ sender, text, musicxml_base64, png_base64, midi_base64, initial }) {
   const messageClass = sender === 'user' ? 'user' : 'ai';
-  
-  // Condição para mostrar os botões de download e a seção de partitura
   const showDownloads = musicxml_base64 || png_base64 || midi_base64; 
-  
+
   return (
     <div className={`message-wrapper ${messageClass}`}>
       <div className={`message-content ${initial ? 'initial-message' : ''}`}>
         {/* O texto da explicação */}
         {text}
         
-        {/* PLAYER DE ÁUDIO MIDI (NOVO BLOCO - Componente AudioPlayer) */}
+        {/* PLAYER DE ÁUDIO MIDI (SUBSTITUÍDO) */}
         {midi_base64 && (
           <div className="audio-player-section">
             <h4>Reprodução de Áudio:</h4>
-            {/* AGORA USAMOS O COMPONENTE CUSTOMIZADO QUE USARÁ O TONE.JS */}
+            {/* AGORA USAMOS O COMPONENTE CUSTOMIZADO */}
             <AudioPlayer midiBase64={midi_base64} /> 
           </div>
         )}
@@ -54,21 +51,18 @@ function Message({ sender, text, musicxml_base64, png_base64, midi_base64, initi
           <div className="download-section">
             <h4>Arquivos:</h4>
             
-            {/* Link de Download do MUSICXML */}
             {musicxml_base64 && createDownloadLink(
                 musicxml_base64, 
                 'ArcaDePandora_Partitura.xml', 
                 'application/vnd.musicxml'
             )}
 
-            {/* Link de Download do MIDI */}
-            {midi_base64 && createDownloadLink( 
+            {midi_base64 && createDownloadLink(
                 midi_base64, 
                 'ArcaDePandora_Audio.mid', 
                 'audio/midi' 
             )}
             
-            {/* Link de Download do PNG */}
             {png_base64 && createDownloadLink(
                 png_base64, 
                 'ArcaDePandora_Visual.png', 
