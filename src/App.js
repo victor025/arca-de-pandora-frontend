@@ -37,8 +37,7 @@ function App() {
     try {
       const response = await fetch(
         // ATUALIZE ESTA LINHA COM O SEU NOVO URL:
-        'https://api.arcadepandora.cloud/webhook/27f6fde4-3853-4997-991a-947a50e3fc30', 
-        {
+        'https://api.arcadepandora.cloud/webhook/27f6fde4-3853-4997-991a-947a50e3fc30',        {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
