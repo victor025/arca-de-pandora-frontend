@@ -8,7 +8,7 @@ function App() {
   const [messages, setMessages] = useState([
     {
       sender: 'ai', 
-      text: "Olá! Sou a Arca de Pandora. Digite um comando (ex: 'Crie uma melodia')." 
+      text: "Olá! Sou a Arca de Pandora. Sou especialista em criar trechos melódicos. Digite um comando (ex: 'Crie uma melodia')." 
     }
   ]);
   const [currentInput, setCurrentInput] = useState('');
