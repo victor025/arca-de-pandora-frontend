@@ -36,13 +36,14 @@ function App() {
 
     try {
       const response = await fetch(
-        // SEU URL DE PRODUÇÃO DO N8N (Verifique se é este mesmo)
-        'https://api.arcadepandora.cloud/webhook/7f60ab7c-a4d7-4b2f-9922-3b16e44d8240', 
+        // ATUALIZE ESTA LINHA COM O SEU NOVO URL:
+        'https://api.arcadepandora.cloud/webhook/27f6fde4-3853-4997-991a-947a50e3fc30', 
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          
-          // 2. PAYLOAD LIMPO: Envia apenas o prompt e o ID
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          // O payload continua o mesmo (prompt + sessionId)
           body: JSON.stringify({ 
             prompt: userMessage.text,
             sessionId: sessionId 
