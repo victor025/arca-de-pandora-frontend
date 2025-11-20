@@ -1,20 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './App.css'; 
 import Message from './Message'; 
-import { v4 as uuidv4 } from 'uuid'; // Importa o gerador de IDs
+import { v4 as uuidv4 } from 'uuid'; // Gera o ID único
 
 function App() {
+  // Mensagem inicial visual
   const [messages, setMessages] = useState([
     {
       sender: 'ai', 
-      text: "Olá! Eu sou a Arca de Pandora (Agente). Me dê um comando de composição." 
+      text: "Olá! Sou a Arca de Pandora. Digite um comando (ex: 'Crie uma melodia')." 
     }
   ]);
   const [currentInput, setCurrentInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  // 1. Gera um ID de sessão único quando a página carrega
-  // O N8N usará isso para lembrar da sua conversa específica
+  // 1. Gera um ID de sessão único quando a página carrega.
+  // O N8N usará isso para lembrar da conversa deste usuário específico.
   const [sessionId] = useState(uuidv4()); 
   
   const messagesEndRef = useRef(null);
@@ -35,13 +36,13 @@ function App() {
 
     try {
       const response = await fetch(
+        // SEU URL DE PRODUÇÃO DO N8N (Verifique se é este mesmo)
         'https://api.arcadepandora.cloud/webhook/7f60ab7c-a4d7-4b2f-9922-3b16e44d8240', 
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           
-          // 2. O PAYLOAD AGORA É SIMPLES E LIMPO
-          // Enviamos apenas a pergunta atual e o ID da sessão
+          // 2. PAYLOAD LIMPO: Envia apenas o prompt e o ID
           body: JSON.stringify({ 
             prompt: userMessage.text,
             sessionId: sessionId 
@@ -52,7 +53,7 @@ function App() {
       if (!response.ok) throw new Error(`Erro na API: ${response.status}`);
 
       const responseText = await response.text();
-      if (!responseText) throw new Error("Resposta vazia.");
+      if (!responseText) throw new Error("Resposta vazia do servidor.");
       
       const data = JSON.parse(responseText);
 
